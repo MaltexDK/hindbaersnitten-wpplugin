@@ -10,7 +10,7 @@ Sæt først API-base-URL under **Indstillinger → Hindbærsnitte API** (uden af
 
 Indsæt en **Shortcode**-blok på en side eller et indlæg:
 
-- `[snitter_reviews]`: liste med klikbare overskrifter til sortering efter overskrift, bageri/sted, karakter og dato. Klik på en anmeldelse for at åbne den i listen.
+- `[snitter_reviews]`: liste med klikbare overskrifter til sortering efter overskrift, bageri/sted, karakter og dato. Klik på en anmeldelse for at åbne hele anmeldelsen i samme popup som Nyeste-kortene.
 - `[snitter_reviews limit="20" sort="rating" dir="desc" q="København"]`: begræns antal, vælg startsortering og søgning. `sort` kan være `date`, `rating`, `title` eller `author`; `dir` er `asc` eller `desc`. `page` vælger API-side, og `per_page` kan bruges i stedet for `limit`.
 - `[snitter_review id="42"]`: én fuld anmeldelse med det angivne ID.
 - `[snitter_latest]`: de 1–3 nyeste anmeldelser som klikbare kort med overskrift, bageri/sted, karakter, tekstuddrag og eventuelt thumbnail. Klik for at åbne hele anmeldelsen i en popup.
@@ -32,11 +32,16 @@ Med shortcode kan du placere blokken i en bred Gruppe for at give plads til fler
 Der vises højst tre anmeldelser i én række; de nyeste vises først.
 
 Popup'en viser hele anmeldelsen og eventuelt billede. Luk med **Luk**, **Escape**
-eller et klik udenfor boksen. Fokus vender tilbage til kortet.
+eller et klik udenfor boksen. Fokus vender tilbage til kortet eller linket i listen.
 Uden JavaScript åbnes hele anmeldelsen direkte under kortet.
 `[snitter_review id="42"]` viser fortsat en fuld anmeldelse direkte på siden.
 
 Blokkene er dynamiske; de henter API-data ved visning og behøver ikke gemmes igen, når der udgives en anmeldelse. API-svar caches kortvarigt (ca. 1–2 minutter).
+
+## Ændringer i 1.1.1
+
+- Listevisningen åbner nu anmeldelser i samme popup som Nyeste-kortene.
+- Sortering bevares, og fokus vender tilbage til anmeldelsens link ved lukning.
 
 ## Ændringer i 1.1.0
 

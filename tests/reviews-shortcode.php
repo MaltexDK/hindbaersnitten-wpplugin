@@ -3,6 +3,7 @@
 define('ABSPATH', __DIR__);
 define('HSNITTE_PLUGIN_URL', 'https://example.test/plugin/');
 function wp_enqueue_style(...$args) {}
+function wp_enqueue_script(...$args) { $GLOBALS['hs_test_scripts'][$args[0]] = $args; }
 define('HSNITTE_OPTION_API_BASE', 'hsnitte_api_base');
 function add_action(...$args) {}
 function shortcode_atts($defaults, $atts, $name) { return array_merge($defaults, $atts); }
@@ -38,6 +39,9 @@ foreach ([['data'=>[], 'meta'=>['total'=>0]], []] as $response) {
 }
 HSNitte_Api_Client::$response = new WP_Error();
 check(str_contains(HSNitte_Shortcodes::reviews(), 'Test API error'), 'API error missing');
+check(isset($GLOBALS['hs_test_scripts']['hsnitte-latest']), 'Shared popup script missing');
+check(($GLOBALS['hs_test_scripts']['hsnitte-list'][2] ?? []) === ['hsnitte-latest'], 'List must load after shared popup script');
+check(!str_contains($html, '<script>'), 'Legacy inline accordion script remains');
 echo "PASS: enveloped and legacy lists, review dates, empty responses and API errors\n";
 
 foreach (['2025-01-31', '31/01/2025', '31-01-2025', '31.01.2025', '2025-01-31 12:30:00'] as $raw) {

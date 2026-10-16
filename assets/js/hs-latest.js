@@ -22,27 +22,33 @@
             if (!active) return;
             var previous = active;
             active = null;
-            previous.item.appendChild(previous.full);
+            if (previous.parent) previous.parent.insertBefore(previous.full, previous.next);
+            else previous.full.remove();
             var target = previous.summary;
             if (target.isConnected && !target.getClientRects().length) {
-                target = previous.item.closest('.hs-latest').querySelector('.hs-latest-card');
+                var latest = previous.summary.closest('.hs-latest');
+                target = latest && latest.querySelector('.hs-latest-card');
             }
             if (target && target.isConnected) target.focus({preventScroll: true});
         });
     }
 
-    document.addEventListener('click', function (event) {
-        var summary = event.target.closest && event.target.closest('.hs-latest-card');
-        if (!summary || !summary.closest('.hs-latest')) return;
-        var item = summary.closest('.hs-latest-item');
-        var full = item.querySelector('.hs-latest-full');
-        if (!full) return;
+    function openReview(trigger, full) {
         if (!dialog) createDialog();
-        event.preventDefault();
-        if (dialog.open || active) return;
-        item.open = false;
-        active = {item: item, summary: summary, full: full};
+        if (dialog.open || active) return false;
+        active = {summary: trigger, full: full, parent: full.parentNode, next: full.nextSibling};
         content.appendChild(full);
+        refresh(full);
+        trigger.setAttribute('aria-haspopup', 'dialog');
+        trigger.setAttribute('aria-controls', dialog.id);
+        document.documentElement.classList.add('hs-review-modal-open');
+        dialog.showModal();
+        dialog.scrollTop = 0;
+        dialog.querySelector('button').focus({preventScroll: true});
+        return true;
+    }
+    function refresh(full) {
+        if (!content || !content.contains(full)) return;
         var heading = full.querySelector('.hs-detail-head h3');
         if (heading) {
             if (!heading.id) heading.id = 'hs-review-dialog-title-' + (++sequence);
@@ -52,11 +58,16 @@
             dialog.removeAttribute('aria-labelledby');
             dialog.setAttribute('aria-label', 'Anmeldelse');
         }
-        summary.setAttribute('aria-haspopup', 'dialog');
-        summary.setAttribute('aria-controls', dialog.id);
-        document.documentElement.classList.add('hs-review-modal-open');
-        dialog.showModal();
-        dialog.scrollTop = 0;
-        dialog.querySelector('button').focus({preventScroll: true});
+    }
+    window.HSNitteReviewDialog = {open: openReview, refresh: refresh};
+    document.addEventListener('click', function (event) {
+        var summary = event.target.closest && event.target.closest('.hs-latest-card');
+        if (!summary || !summary.closest('.hs-latest')) return;
+        var item = summary.closest('.hs-latest-item');
+        var full = item.querySelector('.hs-latest-full');
+        if (!full) return;
+        event.preventDefault();
+        item.open = false;
+        openReview(summary, full);
     });
 })();

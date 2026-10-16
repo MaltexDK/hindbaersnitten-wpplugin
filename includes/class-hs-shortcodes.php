@@ -11,6 +11,7 @@ class HSNitte_Shortcodes {
 
     private static function enqueue_front() {
         if (!defined('HSNITTE_PLUGIN_VER')) define('HSNITTE_PLUGIN_VER', '1.0.0');
+        wp_enqueue_script('hsnitte-latest', HSNITTE_PLUGIN_URL.'assets/js/hs-latest.js', [], HSNITTE_PLUGIN_VER, true);
         wp_enqueue_style('hsnitte-css', HSNITTE_PLUGIN_URL.'assets/css/hs-frontend.css', [], HSNITTE_PLUGIN_VER);
     }
 
@@ -79,6 +80,8 @@ class HSNitte_Shortcodes {
             return '<div class="hs-empty">Ingen anmeldelser fundet.</div>';
         }
 
+        wp_enqueue_script('hsnitte-list', HSNITTE_PLUGIN_URL.'assets/js/hs-list.js', ['hsnitte-latest'], HSNITTE_PLUGIN_VER, true);
+
         // find API-base for JS
         $api_base = rtrim(get_option(HSNITTE_OPTION_API_BASE, ''), '/');
 
@@ -120,129 +123,7 @@ class HSNitte_Shortcodes {
                 </tbody>
             </table>
         </div>
-        <script>
-        (function(){
-            if (window.__hsnitteAccordionBound) return;
-            window.__hsnitteAccordionBound = true;
 
-            function escapeHTML(value) {
-                return String(value == null ? '' : value).replace(/[&<>"']/g, function(c){
-                    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
-                });
-            }
-            function closeAll(openRow){
-                document.querySelectorAll('tr.hs-detail-row').forEach(function(r){
-                    if (!openRow || r !== openRow) r.remove();
-                });
-                document.querySelectorAll('tr.hs-row.is-open').forEach(function(r){
-                    if (!openRow || r !== openRow) r.classList.remove('is-open');
-                });
-            }
-
-            document.addEventListener('click', async function(e){
-                var sort = e.target.closest && e.target.closest('.hs-sort');
-                if (sort && sort.closest('.hs-list-wrap')) {
-                    var table = sort.closest('table');
-                    var body = table.querySelector('tbody');
-                    var th = sort.closest('th');
-                    var direction = th.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
-                    var key = sort.dataset.key;
-                    body.querySelectorAll('.hs-detail-row').forEach(function(row){ row.remove(); });
-                    var rows = Array.from(body.querySelectorAll('.hs-row'));
-                    rows.forEach(function(row){ row.classList.remove('is-open'); });
-                    rows.sort(function(a, b){
-                        var left = key === 'date' ? a.dataset.dateTimestamp : (a.dataset[key] || '');
-                        var right = key === 'date' ? b.dataset.dateTimestamp : (b.dataset[key] || '');
-                        // Missing dates stay last in either direction.
-                        if (key === 'date' && (left === '' || right === '')) {
-                            return left === right ? 0 : left === '' ? 1 : -1;
-                        }
-                        var result = key === 'rating' ? Number(left) - Number(right)
-                            : key === 'date' ? Number(left) - Number(right)
-                            : left.localeCompare(right, 'da', {numeric:true, sensitivity:'base'});
-                        return direction === 'ascending' ? result : -result;
-                    });
-                    rows.forEach(function(row){ body.appendChild(row); });
-                    table.querySelectorAll('th[aria-sort]').forEach(function(header){
-                        header.setAttribute('aria-sort', 'none');
-                        header.querySelector('.caret').textContent = '↕';
-                    });
-                    th.setAttribute('aria-sort', direction);
-                    sort.querySelector('.caret').textContent = direction === 'ascending' ? '▲' : '▼';
-                    return;
-                }
-                var a = e.target.closest && e.target.closest('a.hs-open');
-                if(!a) return;
-                e.preventDefault();
-
-                var tr = a.closest('tr.hs-row');
-                var id = parseInt(a.getAttribute('data-id')||'0',10);
-                var wrap = tr && tr.closest('.hs-list-wrap');
-                var base = wrap ? (wrap.dataset.apiBase||'').replace(/\/+$/,'') : '';
-
-                if(!tr) return;
-
-                // Toggle same row
-                if (tr.classList.contains('is-open')) { closeAll(); return; }
-                closeAll(tr);
-
-                var detail = document.createElement('tr');
-                detail.className = 'hs-detail-row';
-                var colspan = tr.children.length;
-                detail.innerHTML = '<td colspan="'+colspan+'"><div class="hs-card hs-detail"><div class="hs-detail-body">Henter…</div></div></td>';
-                tr.insertAdjacentElement('afterend', detail);
-                tr.classList.add('is-open');
-
-                if (!id) {
-                    detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">Kunne ikke finde ID for denne anmeldelse.</div>';
-                    return;
-                }
-                if (!base) {
-                    detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">API-base-URL er ikke sat i indstillingerne.</div>';
-                    return;
-                }
-
-                try {
-                    var res = await fetch(base + '/reviews/' + id);
-                    if(!res.ok) throw new Error('API-fejl ('+res.status+')');
-                    var data = await res.json();
-
-                    var html = '';
-                    html += '<div class="hs-detail-head">';
-                    html += '<h3>'+ escapeHTML(data.title || ('#'+id)) +'</h3>';
-                    if (data.rating != null) {
-                        html += '<div class="hs-rating"><span class="hs-krymmel">';
-                        var n = Math.max(0, Math.min(6, parseInt(data.rating, 10) || 0));
-                        for (var i=0;i<n;i++){ html += '<i class="krym"></i>'; }
-                        for (var j=n;j<6;j++){ html += '<i class="krym off"></i>'; }
-                        html += '</span></div>';
-                    }
-                    if (data.bakery_name || data.bakery_address || data.bakery_postcode || data.bakery_city) {
-                        var addr = [data.bakery_address, [data.bakery_postcode, data.bakery_city].filter(Boolean).join(" ")].filter(Boolean).join(" • ");
-                        var byline = [data.bakery_name, addr].filter(Boolean).join(" — ");
-                        html += '<div class="hs-byline">'+ escapeHTML(byline) +'</div>';
-                    }
-                    html += '</div>';
-                    html += '<div class="hs-detail-body">';
-                    if (data.body_html) {
-                        var parsed = new DOMParser().parseFromString(data.body_html, 'text/html');
-                        html += '<p>'+escapeHTML(parsed.body.textContent)+'</p>';
-                    }
-                    else if (data.body) { html += '<p>'+ escapeHTML(data.body).replace(/\n/g, '<br>') +'</p>'; }
-                    html += '</div>';
-                    if (data.image_url && /^https?:\/\//i.test(data.image_url)) {
-                        var alt = data.image_alt || '';
-                        html += '<div class="hs-detail-image"><img loading="lazy" src="'+ escapeHTML(data.image_url) +'" alt="'+ escapeHTML(alt) +'">';
-                        if (alt) html += '<div class="hs-image-caption">'+escapeHTML(alt)+'</div>';
-                        html += '</div>';
-                    }
-                    detail.querySelector('.hs-detail-body').parentNode.innerHTML = html;
-                } catch (err) {
-                    detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">'+ escapeHTML(err && err.message ? err.message : 'Kunne ikke hente anmeldelsen') +'</div>';
-                }
-            }, true);
-        })();
-        </script>
 
         <?php
         return ob_get_clean();
@@ -276,7 +157,6 @@ class HSNitte_Shortcodes {
         if (is_wp_error($reviews)) return '<div class="hs-error">'.esc_html($reviews->get_error_message()).'</div>';
         if (!$reviews) return '<div class="hs-empty">Ingen anmeldelser endnu.</div>';
 
-        wp_enqueue_script('hsnitte-latest', HSNITTE_PLUGIN_URL.'assets/js/hs-latest.js', [], HSNITTE_PLUGIN_VER, true);
         ob_start();
         ?>
         <div class="hs-latest">
