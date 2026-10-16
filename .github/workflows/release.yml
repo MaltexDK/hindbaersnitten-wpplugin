@@ -50,9 +50,10 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          unzip -p dist/hindbaersnitten-wpplugin.zip hindbaersnitten-wpplugin/README.md > "$RUNNER_TEMP/release-notes.md"
           # Upload before publishing, so WordPress never sees an incomplete release.
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TAG" --generate-notes
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
           fi
           gh release upload "$RELEASE_TAG" dist/*.zip --clobber
-          gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest --notes-file "$RUNNER_TEMP/release-notes.md"

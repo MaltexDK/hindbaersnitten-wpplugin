@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Hindbærsnitte – Reviews via API
- * Description: Viser anmeldelser fra Hindbærsnitte-API'et via shortcodes.
- * Version:     1.0.3
+ * Description: Viser anmeldelser fra Hindbærsnitte-API'et. Brug Gutenberg-blokkene Snitter – Liste, Snitter – Anmeldelse og Snitter – Nyeste, eller shortcodes [snitter_reviews], [snitter_review id="42"] og [snitter_latest]. Sæt API-URL under Indstillinger → Hindbærsnitte API.
+ * Version:     1.0.4
  * Author:      Maltex Gruppen
  * Author URI:  https://www.maltex.dk
  * License:     GPLv2 or later
@@ -12,7 +12,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('HSNITTE_PLUGIN_VER', '1.0.3');
+define('HSNITTE_PLUGIN_VER', '1.0.4');
 define('HSNITTE_PLUGIN_FILE', __FILE__);
 define('HSNITTE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HSNITTE_PLUGIN_URL', plugin_dir_url(__FILE__));

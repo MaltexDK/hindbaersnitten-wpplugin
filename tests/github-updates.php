@@ -12,7 +12,7 @@ function hs_update_assert($condition, $message) {
 }
 
 $cases = array(
-    array('hsnitte_plugin_checker', 'hindbaersnitten-wpplugin', 'hindbaersnitten-wpplugin', '1.0.3', 'hindbaersnitte-reviews.php'),
+    array('hsnitte_plugin_checker', 'hindbaersnitten-wpplugin', 'hindbaersnitten-wpplugin', '1.0.5', 'hindbaersnitte-reviews.php'),
     array('hsnitte_theme_checker', 'hindbaersnitten-wptheme', 'hindbaersnitten-child', '1.0.2', 'style.css'),
 );
 $scenario = 'stable';
@@ -51,6 +51,8 @@ $mock = function ($pre, $args, $url) use (&$scenario, &$requests, $cases) {
                 $release['assets'] = array();
             }
             $body = wp_json_encode($release);
+        } elseif (strpos($url, '/readme.txt') !== false) {
+            $body = preg_replace('/Stable tag:\s*[0-9.]+/', 'Stable tag: ' . $version, file_get_contents(WP_PLUGIN_DIR . '/hindbaersnitten-wpplugin/readme.txt'));
         } elseif (strpos($url, '/' . $header) !== false) {
             $source = $header === 'style.css'
                 ? WP_CONTENT_DIR . '/themes/hindbaersnitten-child/style.css'
@@ -79,6 +81,13 @@ try {
                 $update = $checker->requestUpdate();
                 hs_update_assert($update && $update->version === $version, 'Update metadata incorrect');
                 hs_update_assert($update->download_url === $reference->downloadUrl, 'Download URL incorrect');
+                if ($slug === 'hindbaersnitten-wpplugin') {
+                    $info = $checker->requestInfo();
+                    hs_update_assert(strpos($info->sections['description'], '[snitter_latest]') !== false, 'WordPress usage instructions missing');
+                    hs_update_assert(strpos($info->sections['description'], 'Gutenberg') !== false, 'Gutenberg documentation missing');
+                    hs_update_assert(strpos($info->sections['description'], 'git push') === false, 'Developer instructions leaked into user documentation');
+                    echo "WordPress plugin details: current remote usage instructions OK\n";
+                }
             } else {
                 hs_update_assert($reference === null, 'Unsafe source accepted: ' . $scenario);
                 hs_update_assert(count($requests) === 1 && strpos($requests[0], '/releases/latest') !== false, 'Fell back to tag or branch');

@@ -39,3 +39,17 @@ foreach ([['data'=>[], 'meta'=>['total'=>0]], []] as $response) {
 HSNitte_Api_Client::$response = new WP_Error();
 check(str_contains(HSNitte_Shortcodes::reviews(), 'Test API error'), 'API error missing');
 echo "PASS: enveloped and legacy lists, review dates, empty responses and API errors\n";
+
+foreach (['2025-01-31', '31/01/2025', '31-01-2025', '31.01.2025', '2025-01-31 12:30:00'] as $raw) {
+    HSNitte_Api_Client::$response = [['id'=>1, 'title'=>'Dato', 'review_date'=>$raw]];
+    $html = HSNitte_Shortcodes::reviews();
+    $timestamp = str_contains($raw, '12:30') ? strtotime('2025-01-31 12:30:00 UTC') : strtotime('2025-01-31 UTC');
+    check(str_contains($html, 'data-date-timestamp="'.$timestamp.'"'), 'Numeric date sort missing for '.$raw);
+    check(str_contains($html, '>2025-01-31<'), 'Incorrect displayed date for '.$raw);
+}
+foreach (['', '31/02/2025', 'not-a-date'] as $raw) {
+    HSNitte_Api_Client::$response = [['id'=>1, 'review_date'=>$raw]];
+    check(str_contains(HSNitte_Shortcodes::reviews(), 'data-date-timestamp=""'), 'Invalid date not handled: '.$raw);
+}
+echo "PASS: numeric timestamps for ISO and Danish dates; invalid dates excluded
+";

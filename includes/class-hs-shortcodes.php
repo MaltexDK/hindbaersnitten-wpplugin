@@ -21,6 +21,18 @@ class HSNitte_Shortcodes {
         return $default;
     }
 
+    /** Parse API dates explicitly, including legacy Danish date formats. */
+    private static function date_timestamp(string $value) {
+        foreach (['!Y-m-d', '!Y-m-d H:i:s', '!Y-m-d\TH:i:sP', '!d-m-Y', '!d/m/Y', '!d.m.Y'] as $format) {
+            $date = DateTimeImmutable::createFromFormat($format, trim($value), new DateTimeZone('UTC'));
+            $errors = DateTimeImmutable::getLastErrors();
+            if ($date !== false && ($errors === false || (!$errors['warning_count'] && !$errors['error_count']))) {
+                return $date->getTimestamp();
+            }
+        }
+        return null;
+    }
+
     private static function krymmel($n) {
         $n = max(0, min(6, (int)$n));
         $out = '<span class="hs-krymmel" role="img" aria-label="'.esc_attr($n.' af 6 krymmel').'">';
@@ -90,10 +102,11 @@ class HSNitte_Shortcodes {
                     $bakery = (string) self::get_field($row, ['bakery_name','bageri','bageri_navn'], '');
                     $city = (string) self::get_field($row, ['bakery_city','by','city'], '');
                     $date_raw = (string) self::get_field($row, ['review_date','date','published_at','created_at'], '');
-                    $date = $date_raw ? date_i18n(get_option('date_format'), strtotime($date_raw)) : '';
+                    $date_timestamp = self::date_timestamp($date_raw);
+                    $date = $date_timestamp !== null ? date_i18n(get_option('date_format'), $date_timestamp) : '';
                     if ($title === '') $title = ($id > 0 ? 'Anmeldelse #'.$id : __('(uden titel)','hindbaersnitte'));
                 ?>
-                    <tr class="hs-row" data-review-id="<?php echo esc_attr($id); ?>" data-title="<?php echo esc_attr($title); ?>" data-bakery="<?php echo esc_attr(trim($bakery.' '.$city)); ?>" data-rating="<?php echo esc_attr($rating); ?>" data-date="<?php echo esc_attr($date_raw); ?>">
+                    <tr class="hs-row" data-review-id="<?php echo esc_attr($id); ?>" data-title="<?php echo esc_attr($title); ?>" data-bakery="<?php echo esc_attr(trim($bakery.' '.$city)); ?>" data-rating="<?php echo esc_attr($rating); ?>" data-date="<?php echo esc_attr($date_raw); ?>" data-date-timestamp="<?php echo esc_attr($date_timestamp ?? ''); ?>">
                         <td class="hs-col hs-title">
                             <a href="#" class="hs-open" data-id="<?php echo esc_attr($id); ?>">
                                 <?php echo esc_html($title); ?>
@@ -138,9 +151,14 @@ class HSNitte_Shortcodes {
                     var rows = Array.from(body.querySelectorAll('.hs-row'));
                     rows.forEach(function(row){ row.classList.remove('is-open'); });
                     rows.sort(function(a, b){
-                        var left = a.dataset[key] || '', right = b.dataset[key] || '';
+                        var left = key === 'date' ? a.dataset.dateTimestamp : (a.dataset[key] || '');
+                        var right = key === 'date' ? b.dataset.dateTimestamp : (b.dataset[key] || '');
+                        // Missing dates stay last in either direction.
+                        if (key === 'date' && (left === '' || right === '')) {
+                            return left === right ? 0 : left === '' ? 1 : -1;
+                        }
                         var result = key === 'rating' ? Number(left) - Number(right)
-                            : key === 'date' ? (Date.parse(left) || 0) - (Date.parse(right) || 0)
+                            : key === 'date' ? Number(left) - Number(right)
                             : left.localeCompare(right, 'da', {numeric:true, sensitivity:'base'});
                         return direction === 'ascending' ? result : -result;
                     });

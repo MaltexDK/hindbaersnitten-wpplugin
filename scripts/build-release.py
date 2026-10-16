@@ -8,7 +8,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 SLUG = 'hindbaersnitten-wpplugin'
 HEADER = 'hindbaersnitte-reviews.php'
-ENTRIES = ['hindbaersnitte-reviews.php', 'includes', 'assets', 'lib', 'README.md']
+ENTRIES = ['hindbaersnitte-reviews.php', 'includes', 'assets', 'lib', 'README.md', 'readme.txt']
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--tag', help='Require a stable vMAJOR.MINOR.PATCH tag matching the header')
@@ -25,6 +25,9 @@ if HEADER.endswith('.php'):
     constant = re.search(r"define\('HSNITTE_PLUGIN_VER',\s*'([^']+)'\)", text)
     if not constant or constant[1] != version:
         parser.error('HSNITTE_PLUGIN_VER must match the plugin header')
+readme_version = re.search(r'^Stable tag:\s*(\S+)', (ROOT / 'readme.txt').read_text(), re.M)
+if not readme_version or readme_version[1] != version:
+    parser.error('readme.txt Stable tag must match the plugin version')
 if not (ROOT / 'lib/plugin-update-checker/plugin-update-checker.php').is_file():
     parser.error('Bundled Plugin Update Checker is missing')
 if not (ROOT / 'lib/plugin-update-checker/license.txt').is_file():
