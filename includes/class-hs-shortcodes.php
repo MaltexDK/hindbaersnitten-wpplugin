@@ -60,7 +60,8 @@ class HSNitte_Shortcodes {
             return '<div class="hs-error">'.esc_html($resp->get_error_message()).'</div>';
         }
 
-        $items = is_array($resp) ? $resp : [];
+        // API v1 wraps rows in data; retain support for older, flat responses.
+        $items = is_array($resp) ? ($resp['data'] ?? $resp) : [];
         if (empty($items)) {
             return '<div class="hs-empty">Ingen anmeldelser fundet.</div>';
         }
@@ -80,7 +81,7 @@ class HSNitte_Shortcodes {
                     $rating = (int) self::get_field($row, ['rating','score','krymmel'], 0);
                     $bakery = (string) self::get_field($row, ['bakery_name','bageri','bageri_navn'], '');
                     $city = (string) self::get_field($row, ['bakery_city','by','city'], '');
-                    $date_raw = (string) self::get_field($row, ['date','published_at','created_at'], '');
+                    $date_raw = (string) self::get_field($row, ['review_date','date','published_at','created_at'], '');
                     $date = $date_raw ? date_i18n(get_option('date_format'), strtotime($date_raw)) : '';
                     if ($title === '') $title = ($id > 0 ? 'Anmeldelse #'.$id : __('(uden titel)','hindbaersnitte'));
                 ?>
