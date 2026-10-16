@@ -269,18 +269,47 @@ class HSNitte_Shortcodes {
 
     public static function latest() {
         self::enqueue_front();
-
         if (!class_exists('HSNitte_Api_Client')) {
             return '<div class="hs-error">API-klienten mangler (HSNitte_Api_Client).</div>';
         }
+        $reviews = HSNitte_Api_Client::latest_reviews();
+        if (is_wp_error($reviews)) return '<div class="hs-error">'.esc_html($reviews->get_error_message()).'</div>';
+        if (!$reviews) return '<div class="hs-empty">Ingen anmeldelser endnu.</div>';
 
-        $rev = HSNitte_Api_Client::latest();
-        if (is_wp_error($rev)) {
-            return '<div class="hs-error">'.esc_html($rev->get_error_message()).'</div>';
-        }
-        if (!$rev) return '<div class="hs-empty">Ingen anmeldelser endnu.</div>';
-
-        return self::render_detail($rev, true);
+        wp_enqueue_script('hsnitte-latest', HSNITTE_PLUGIN_URL.'assets/js/hs-latest.js', [], HSNITTE_PLUGIN_VER, true);
+        ob_start();
+        ?>
+        <div class="hs-latest">
+            <div class="hs-latest-grid">
+            <?php foreach ($reviews as $review):
+                $title = trim((string)($review['title'] ?? '')) ?: 'Anmeldelse #'.(int)($review['id'] ?? 0);
+                $bakery = (string)($review['bakery_name'] ?? '');
+                $city = (string)($review['bakery_city'] ?? '');
+                $body = (string)($review['body_html'] ?? ($review['body'] ?? ''));
+                $text = wp_strip_all_tags(str_ireplace(['</p>', '</div>', '<br>', '<br/>', '<br />'], ' ', $body));
+                $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode($text, ENT_QUOTES, 'UTF-8')));
+                $excerpt = wp_html_excerpt($text, 180, '…');
+            ?>
+                <details class="hs-latest-item">
+                    <summary class="hs-latest-card" aria-label="<?php echo esc_attr('Læs anmeldelsen: '.$title); ?>">
+                        <?php if (!empty($review['image_url'])): ?>
+                        <span class="hs-latest-thumbnail"><img loading="lazy" decoding="async" src="<?php echo esc_url($review['image_url']); ?>" alt=""></span>
+                        <?php endif; ?>
+                        <span class="hs-latest-copy">
+                            <strong class="hs-latest-title"><?php echo esc_html($title); ?></strong>
+                            <span class="hs-latest-bakery"><?php echo esc_html(implode(' • ', array_filter([$bakery, $city]))); ?></span>
+                            <?php echo self::krymmel((int)($review['rating'] ?? 0)); ?>
+                            <span class="hs-latest-excerpt"><?php echo esc_html($excerpt); ?></span>
+                            <span class="hs-latest-more">Læs anmeldelsen <span class="hs-latest-arrow" aria-hidden="true"></span></span>
+                        </span>
+                    </summary>
+                    <div class="hs-latest-full"><?php echo self::render_detail($review, true); ?></div>
+                </details>
+            <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     private static function render_detail(array $rev, bool $wrap = true) {

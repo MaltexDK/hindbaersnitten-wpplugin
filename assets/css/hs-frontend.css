@@ -43,3 +43,49 @@
  .hs-krymmel .krym{width:8px;height:8px}
  .hs-card.hs-detail{padding:12px}
 }
+
+/* Latest is sized by the space the block actually receives, including sidebars. */
+.hs-latest { container: hs-latest / inline-size; width:100%; max-width:100%; }
+.hs-latest-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(1rem,2.5vw,2rem); align-items:stretch; }
+.hs-latest-grid > .hs-latest-item { min-width:0; margin:0; background:var(--wp--preset--color--white,#fff); border:1px solid var(--hs-border,#e8d9ce); border-radius:var(--hs-radius,14px); overflow:hidden; }
+.hs-latest-grid > .hs-latest-item:nth-child(n+2) { display:none; }
+.hs-latest-card { list-style:none; display:flex; flex-direction:column; height:100%; box-sizing:border-box; cursor:pointer; color:inherit; }
+.hs-latest-card::marker { content:''; }
+.hs-latest-card::-webkit-details-marker { display:none; }
+.hs-latest-card:focus-visible { outline:3px solid var(--wp--preset--color--raspberry,#a91d46); outline-offset:-4px; border-radius:inherit; }
+.hs-latest-thumbnail { display:block; aspect-ratio:16/10; background:var(--wp--preset--color--shortbread,#f2e4d2); overflow:hidden; }
+.hs-latest-thumbnail img { display:block; width:100%; height:100%; object-fit:cover; }
+.hs-latest-copy { display:flex; flex-direction:column; flex:1; gap:.75rem; padding:clamp(1.2rem,3cqi,1.75rem); overflow-wrap:anywhere; }
+.hs-latest-title { font-family:var(--wp--preset--font-family--fraunces,Georgia,serif); font-size:1.4rem; font-size:clamp(1.35rem,2.4cqi,1.7rem); font-weight:600; line-height:1.2; color:var(--wp--preset--color--chocolate,#3c2928); }
+.hs-latest-bakery { font-size:.875rem; color:var(--wp--preset--color--muted,#746965); }
+.hs-latest-excerpt { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:4; overflow:hidden; font-size:1rem; line-height:1.65; }
+.hs-latest-more { margin-top:auto; padding-top:.5rem; color:var(--wp--preset--color--raspberry,#a91d46); text-decoration:underline; text-underline-offset:.2em; font-size:.9rem; font-weight:600; }
+.hs-latest-card:hover .hs-latest-more { color:var(--wp--preset--color--chocolate,#3c2928); }
+.hs-latest-item > .hs-latest-full .hs-card.hs-detail { border:0; box-shadow:none; margin:0; }
+.hs-latest-item[open] > .hs-latest-card { height:auto; border-bottom:1px solid var(--hs-border,#e8d9ce); }
+@container hs-latest (min-width:36rem) {
+ .hs-latest-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .hs-latest-grid > .hs-latest-item:nth-child(2) { display:block; }
+}
+@container hs-latest (min-width:56rem) {
+ .hs-latest-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .hs-latest-grid > .hs-latest-item:nth-child(3) { display:block; }
+}
+@supports not (container-type:inline-size) {
+ @media(min-width:768px) { .hs-latest-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .hs-latest-grid > .hs-latest-item:nth-child(2) { display:block; } }
+ @media(min-width:1100px) { .hs-latest-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .hs-latest-grid > .hs-latest-item:nth-child(3) { display:block; } }
+}
+html.hs-review-modal-open { overflow:hidden; scrollbar-gutter:stable; }
+.hs-review-dialog { box-sizing:border-box; width:calc(100% - 2rem); max-width:52rem; max-height:90vh; max-height:90dvh; margin:auto; padding:clamp(1rem,3vw,2rem); overflow:auto; overscroll-behavior:contain; border:1px solid var(--hs-border,#e8d9ce); border-radius:var(--hs-radius,14px); color:var(--wp--preset--color--ink,#3c2928); background:var(--wp--preset--color--white,#fff); box-shadow:0 20px 80px #24151e40; }
+.hs-review-dialog::backdrop { background:rgb(38 22 28 / .6); backdrop-filter:blur(2px); }
+.hs-review-dialog-toolbar { position:sticky; top:0; z-index:1; display:flex; justify-content:flex-end; margin-bottom:.75rem; background:var(--wp--preset--color--white,#fff); }
+.hs-review-dialog-close { min-height:44px; min-width:44px; padding:.5rem .8rem; border:1px solid var(--hs-border,#e8d9ce); border-radius:8px; font:inherit; font-size:.95rem; cursor:pointer; background:var(--wp--preset--color--icing,#fff9f6); color:var(--wp--preset--color--chocolate,#3c2928); }
+.hs-review-dialog-close span { font-size:1.4em; margin-left:.4rem; }
+.hs-review-dialog-close:focus-visible { outline:2px solid var(--wp--preset--color--raspberry,#a91d46); outline-offset:3px; }
+.hs-review-dialog .hs-review-dialog-content .hs-card.hs-detail { border:0; border-radius:0; box-shadow:none; margin:0; padding:0; }
+.hs-review-dialog-content { min-width:0; max-width:45rem; margin-inline:auto; overflow-wrap:anywhere; }
+@media(max-width:600px) { .hs-review-dialog { width:calc(100% - 1rem); max-height:calc(100vh - 1rem); max-height:calc(100dvh - 1rem); } }
+
+.hs-latest-copy .hs-krymmel, .hs-review-dialog .hs-krymmel { max-width:none; flex-wrap:nowrap; }
+
+.hs-latest-arrow { display:inline-block; width:.45rem; height:.45rem; margin-left:.35rem; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; transform:rotate(45deg); vertical-align:.05em; }

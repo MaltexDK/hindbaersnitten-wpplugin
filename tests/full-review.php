@@ -21,8 +21,8 @@ try {
     foreach (['Hele anmeldelsens sidste afsnit.', 'snitte.jpg', 'En snitte', 'Testvej 1', '5 af 6 krymmel'] as $text) verify(str_contains($latest, $text), 'Missing latest detail: '.$text);
     verify(in_array($base.'/reviews/42', $urls, true), 'Latest must fetch full detail');
     verify(wp_style_is('hsnitte-css', 'enqueued'), 'Standalone latest CSS must be enqueued');
-    verify($latest === do_shortcode('[snitter_review id="42"]'), 'Latest and detail must share markup');
-    verify($latest === render_block(['blockName'=>'hindbaersnitte/latest', 'attrs'=>[], 'innerContent'=>[]]), 'Gutenberg latest must use same renderer');
+    verify(str_contains($latest, do_shortcode('[snitter_review id="42"]')), 'Popup and detail must share markup');
+    verify(str_contains(render_block(['blockName'=>'hindbaersnitte/latest', 'attrs'=>[], 'innerContent'=>[]]), $latest), 'Gutenberg latest must use same renderer');
     $plugin = get_plugin_data(HSNITTE_PLUGIN_FILE, false, false);
     verify($plugin['AuthorURI'] === 'https://www.maltex.dk', 'Author link missing');
     $list = do_shortcode('[snitter_reviews limit="10"]');

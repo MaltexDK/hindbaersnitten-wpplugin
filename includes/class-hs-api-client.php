@@ -47,6 +47,25 @@ class HSNitte_Api_Client {
         return self::get('reviews/'.$id, [], 120);
     }
 
+    /** The three most recent published reviews, including full text for excerpts/popups. */
+    public static function latest_reviews() {
+        $response = self::reviews(['sort'=>'date', 'dir'=>'desc', 'page'=>1, 'per_page'=>3]);
+        if (is_wp_error($response)) return $response;
+        if (!is_array($response)) return new WP_Error('hsnitte_latest_response', 'Kunne ikke læse de nyeste anmeldelser.');
+        $rows = $response['data'] ?? $response;
+        if (!is_array($rows)) return new WP_Error('hsnitte_latest_response', 'Kunne ikke læse de nyeste anmeldelser.');
+        $reviews = [];
+        foreach (array_slice($rows, 0, 3) as $row) {
+            $id = is_array($row) ? (int)($row['id'] ?? 0) : 0;
+            if ($id <= 0) return new WP_Error('hsnitte_latest_id', 'En af de nyeste anmeldelser mangler et ID.');
+            $review = self::review($id);
+            if (is_wp_error($review)) return $review;
+            if (!is_array($review) || !$review) return new WP_Error('hsnitte_latest_detail', 'Kunne ikke hente hele anmeldelsen.');
+            $reviews[] = $review;
+        }
+        return $reviews;
+    }
+
     /** Nyeste */
     public static function latest() {
         $latest = self::get('reviews/latest', [], 60);

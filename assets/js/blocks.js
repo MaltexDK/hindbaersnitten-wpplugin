@@ -3,7 +3,7 @@
   const { useState, useEffect } = wp.element;
   const { __ } = wp.i18n;
   const { PanelBody, SelectControl, RangeControl, TextControl, Notice } = wp.components;
-  const { InspectorControls } = wp.blockEditor;
+  const { InspectorControls, useBlockProps } = wp.blockEditor;
 
   const apiBase = (w=> w.HSNITTE_API && w.HSNITTE_API.base || '')(window);
   const settingsUrl = (w=> w.HSNITTE_API && w.HSNITTE_API.settingsUrl || '#')(window);
@@ -71,8 +71,8 @@
   const PreviewSingle = ({id}) => wp.element.createElement(ServerSideRender, {
     block: 'hindbaersnitte/review', attributes: {id: id || 0}
   });
-  const PreviewLatest = () => wp.element.createElement(ServerSideRender, {
-    block: 'hindbaersnitte/latest'
+  const PreviewLatest = (attributes) => wp.element.createElement(ServerSideRender, {
+    block: 'hindbaersnitte/latest', attributes
   });
 
   // 1) Listeblok
@@ -157,10 +157,12 @@
 
   // 3) Nyeste
   registerBlockType('hindbaersnitte/latest', {
+    apiVersion: 2,
     title: __('Snitter – Nyeste', 'hindbaersnitte'),
     icon: 'star-filled',
     category: 'widgets',
-    edit: ()=> wp.element.createElement(PreviewLatest, null),
+    supports: {align: ['wide', 'full']},
+    edit: (props)=> wp.element.createElement('div', useBlockProps(), wp.element.createElement(PreviewLatest, props.attributes)),
     save: ()=>null
   });
 

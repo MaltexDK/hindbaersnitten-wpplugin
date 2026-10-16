@@ -12,7 +12,7 @@ function hs_update_assert($condition, $message) {
 }
 
 $cases = array(
-    array('hsnitte_plugin_checker', 'hindbaersnitten-wpplugin', 'hindbaersnitten-wpplugin', '1.0.5', 'hindbaersnitte-reviews.php'),
+    array('hsnitte_plugin_checker', 'hindbaersnitten-wpplugin', 'hindbaersnitten-wpplugin', '1.2.0', 'hindbaersnitte-reviews.php'),
     array('hsnitte_theme_checker', 'hindbaersnitten-wptheme', 'hindbaersnitten-child', '1.0.2', 'style.css'),
 );
 $scenario = 'stable';
