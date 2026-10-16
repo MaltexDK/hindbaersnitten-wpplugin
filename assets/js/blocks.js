@@ -66,49 +66,14 @@
     );
   };
 
-  const PreviewSingle = ({id})=>{
-    const [data,setData] = useState(null);
-    const [err,setErr] = useState('');
-    useEffect(()=>{
-      let alive=true; setData(null); setErr('');
-      if (!apiBase || !id) return;
-      fetchJSON(apiBase+'/reviews/'+id).then(j=>{ if(alive) setData(j); }).catch(e=>{ if(alive) setErr(e.message); });
-      return ()=>{ alive=false; };
-    }, [id]);
-    if (!apiBase) return wp.element.createElement(Notice, {status:'warning', isDismissible:false},
-      wp.element.createElement('span', null, __('Sæt API-URL under Indstillinger → Hindbærsnitte API.', 'hindbaersnitte')),
-      wp.element.createElement('a', {href:settingsUrl, style:{marginLeft:8}}, __('Åbn indstillinger', 'hindbaersnitte'))
-    );
-    if (!id) return wp.element.createElement('div', {className:'hs-card'}, __('Vælg et ID i indstillingerne til højre.','hindbaersnitte'));
-    if (err) return wp.element.createElement('div', {className:'hs-error'}, 'Fejl: '+err);
-    if (!data) return wp.element.createElement('div', {className:'hs-card'}, 'Henter…');
-    return wp.element.createElement('div', {className:'hs-card'},
-      wp.element.createElement('h3', null, data.title||''),
-      wp.element.createElement('div', null, (data.bakery_name||'') + ' • ' + (data.review_date||'')),
-      wp.element.createElement('p', null, (data.body||'').slice(0,160)+'…')
-    );
-  };
-
-  const PreviewLatest = ()=>{
-    const [data,setData] = useState(null);
-    const [err,setErr] = useState('');
-    useEffect(()=>{
-      let alive=true; setData(null); setErr('');
-      if (!apiBase) return;
-      fetchJSON(apiBase+'/reviews/latest').then(j=>{ if(alive) setData(j); }).catch(e=>{ if(alive) setErr(e.message); });
-      return ()=>{ alive=false; };
-    }, []);
-    if (!apiBase) return wp.element.createElement(Notice, {status:'warning', isDismissible:false},
-      wp.element.createElement('span', null, __('Sæt API-URL under Indstillinger → Hindbærsnitte API.', 'hindbaersnitte')),
-      wp.element.createElement('a', {href:settingsUrl, style:{marginLeft:8}}, __('Åbn indstillinger', 'hindbaersnitte'))
-    );
-    if (err) return wp.element.createElement('div', {className:'hs-error'}, 'Fejl: '+err);
-    if (!data) return wp.element.createElement('div', {className:'hs-card'}, 'Henter…');
-    return wp.element.createElement('div', {className:'hs-card'},
-      wp.element.createElement('strong', null, data.title||''),
-      wp.element.createElement('div', null, (data.bakery_name||'') + ' • ' + (data.review_date||''))
-    );
-  };
+  // Use the PHP renderer so editor and published full reviews stay in sync.
+  const ServerSideRender = wp.serverSideRender.default || wp.serverSideRender;
+  const PreviewSingle = ({id}) => wp.element.createElement(ServerSideRender, {
+    block: 'hindbaersnitte/review', attributes: {id: id || 0}
+  });
+  const PreviewLatest = () => wp.element.createElement(ServerSideRender, {
+    block: 'hindbaersnitte/latest'
+  });
 
   // 1) Listeblok
   registerBlockType('hindbaersnitte/reviews', {

@@ -7,7 +7,7 @@ add_action('init', function () {
     wp_register_script(
         'hsnitte-blocks',
         HSNITTE_PLUGIN_URL.'assets/js/blocks.js',
-        ['wp-blocks','wp-element','wp-i18n','wp-components','wp-block-editor'],
+        ['wp-blocks','wp-element','wp-i18n','wp-components','wp-block-editor','wp-server-side-render'],
         HSNITTE_PLUGIN_VER,
         true
     );
@@ -24,12 +24,13 @@ add_action('init', function () {
         'settingsUrl' => admin_url('options-general.php?page=hsnitte-api'),
     ]);
 
-    // Fælles args: brug frontend CSS/JS så detaljevisning virker
+    wp_register_style('hsnitte-css', HSNITTE_PLUGIN_URL.'assets/css/hs-frontend.css', [], HSNITTE_PLUGIN_VER);
+
+    // Shared styles keep the editor and published reviews consistent.
     $common = [
         'editor_script' => 'hsnitte-blocks',
-        'editor_style'  => 'hsnitte-blocks',
+        'editor_style'  => ['hsnitte-blocks', 'hsnitte-css'],
         'style'         => 'hsnitte-css',
-        'script'        => 'hsnitte-js',
     ];
 
     // 1) Listeblok

@@ -25,3 +25,21 @@
 .hs-latest .hs-latest-title a{font-size:1.2rem;font-weight:700;color:#0b5dd7;text-decoration:none}
 .hs-latest .hs-latest-meta{color:#374151;margin-top:4px}
 .hs-latest .sep{opacity:.4;margin:0 6px}
+
+/* Shared full-review layout, including a latest review used on the front page. */
+.hs-card.hs-detail{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-wrap:anywhere}
+.hs-detail-head h3{margin:0 0 .5rem}
+.hs-byline{margin:.5rem 0 1rem;color:#4b5563;font-size:.9em}
+.hs-detail-image img{width:auto;max-width:100%;height:auto;max-height:32rem;object-fit:contain}
+.hs-image-caption{font-size:.85em;color:#4b5563;margin-top:.4rem}
+.hs-list-wrap{max-width:100%;overflow-x:auto}
+.hs-detail-row>td{padding:0}
+.hs-row.is-open{background:rgba(0,0,0,.03)}
+.hs-sort:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+@media(max-width:600px){
+ .hs-table th,.hs-table td{padding:8px 5px}
+ .hs-table th{white-space:normal}
+ .hs-krymmel{gap:2px;flex-wrap:wrap;max-width:64px}
+ .hs-krymmel .krym{width:8px;height:8px}
+ .hs-card.hs-detail{padding:12px}
+}

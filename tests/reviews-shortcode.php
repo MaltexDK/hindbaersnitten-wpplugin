@@ -1,6 +1,8 @@
 <?php
 // Run with PHP CLI; no WordPress installation is needed for this regression test.
 define('ABSPATH', __DIR__);
+define('HSNITTE_PLUGIN_URL', 'https://example.test/plugin/');
+function wp_enqueue_style(...$args) {}
 define('HSNITTE_OPTION_API_BASE', 'hsnitte_api_base');
 function add_action(...$args) {}
 function shortcode_atts($defaults, $atts, $name) { return array_merge($defaults, $atts); }

@@ -49,7 +49,11 @@ class HSNitte_Api_Client {
 
     /** Nyeste */
     public static function latest() {
-        return self::get('reviews/latest', [], 60);
+        $latest = self::get('reviews/latest', [], 60);
+        if (is_wp_error($latest) || empty($latest)) return $latest;
+        // The latest endpoint is a summary; body, image and address live on detail.
+        if (empty($latest['id'])) return new WP_Error('hsnitte_latest_id', 'Den nyeste anmeldelse mangler et ID.');
+        return self::review((int)$latest['id']);
     }
 }
 ?>
