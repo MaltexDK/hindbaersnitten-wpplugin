@@ -7,6 +7,7 @@ class HSNitte_Shortcodes {
         add_shortcode('snitter_reviews', [__CLASS__, 'reviews']);
         add_shortcode('snitter_review',  [__CLASS__, 'review']);
         add_shortcode('snitter_latest',  [__CLASS__, 'latest']);
+        add_shortcode('snitter_reviewers', [__CLASS__, 'reviewers']);
     }
 
     private static function enqueue_front() {
@@ -53,6 +54,7 @@ class HSNitte_Shortcodes {
             'page'   => 1,
             'q'      => '',
             'status' => 'published',
+            'author_id' => 0,
         ], $atts, 'snitter_reviews');
 
         if (!class_exists('HSNitte_Api_Client')) {
@@ -68,6 +70,7 @@ class HSNitte_Shortcodes {
             'q'        => $atts['q'],
             'status'   => $atts['status'],
         ];
+        if ((int)$atts['author_id'] > 0) $query['author_id'] = (int)$atts['author_id'];
         $resp = HSNitte_Api_Client::reviews($query);
 
         if (is_wp_error($resp)) {
@@ -82,12 +85,9 @@ class HSNitte_Shortcodes {
 
         wp_enqueue_script('hsnitte-list', HSNITTE_PLUGIN_URL.'assets/js/hs-list.js', ['hsnitte-latest'], HSNITTE_PLUGIN_VER, true);
 
-        // find API-base for JS
-        $api_base = rtrim(get_option(HSNITTE_OPTION_API_BASE, ''), '/');
-
         ob_start();
         ?>
-        <div class="hs-list-wrap" data-api-base="<?php echo esc_attr($api_base); ?>">
+        <div class="hs-list-wrap" data-detail-url="<?php echo esc_url(rest_url('hindbaersnitte/v1/reviews/')); ?>">
             <table class="hs-table hs-reviews">
                 <thead>
                     <tr>
@@ -122,11 +122,35 @@ class HSNitte_Shortcodes {
                 <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php if ((int)$atts['author_id'] > 0 && (int)$query['page'] * (int)$query['per_page'] < (int)($resp['meta']['total'] ?? 0)): ?>
+                <button type="button" class="hs-reviews-more" data-url="<?php echo esc_url(add_query_arg('page', (int)$query['page']+1, rest_url('hindbaersnitte/v1/reviewers/'.(int)$atts['author_id'].'/reviews'))); ?>">Vis flere anmeldelser</button>
+            <?php endif; ?>
         </div>
 
 
         <?php
         return ob_get_clean();
+    }
+
+    public static function reviewers($atts = []) {
+        self::enqueue_front();
+        wp_enqueue_script('hsnitte-list', HSNITTE_PLUGIN_URL.'assets/js/hs-list.js', ['hsnitte-latest'], HSNITTE_PLUGIN_VER, true);
+        wp_enqueue_script('hsnitte-reviewers', HSNITTE_PLUGIN_URL.'assets/js/hs-reviewers.js', ['hsnitte-list'], HSNITTE_PLUGIN_VER, true);
+        $response = HSNitte_Api_Client::reviewers();
+        if (is_wp_error($response)) return '<div class="hs-error">Kunne ikke hente anmeldere. Kontrollér at anmeldersystemets API er opdateret.</div>';
+        $reviewers = $response['data'] ?? [];
+        if (!$reviewers) return '<p class="hs-empty">Ingen anmeldere med udgivne anmeldelser endnu.</p>';
+        ob_start(); ?>
+        <div class="hs-reviewers">
+        <?php foreach ($reviewers as $reviewer): ?>
+            <details class="hs-reviewer" data-url="<?php echo esc_url(rest_url('hindbaersnitte/v1/reviewers/'.(int)$reviewer['id'].'/reviews')); ?>">
+                <summary><span><?php echo esc_html($reviewer['handle']); ?></span><span class="hs-reviewer-count"><?php echo (int)$reviewer['review_count'].((int)$reviewer['review_count'] === 1 ? ' anmeldelse' : ' anmeldelser'); ?></span></summary>
+                <div class="hs-reviewer-reviews"><p role="status">Åbn anmelderen for at hente anmeldelser.</p></div>
+            </details>
+        <?php endforeach; ?>
+        <noscript><p>Aktivér JavaScript for at hente anmeldernes anmeldelser og åbne dem i popup.</p></noscript>
+        </div>
+        <?php return ob_get_clean();
     }
 
     public static function review($atts = []) {
@@ -192,14 +216,16 @@ class HSNitte_Shortcodes {
         return ob_get_clean();
     }
 
-    private static function render_detail(array $rev, bool $wrap = true) {
+    public static function render_detail(array $rev, bool $wrap = true) {
         $title  = $rev['title'] ?? ($rev['overskrift'] ?? '');
         $rating = (int)($rev['rating'] ?? ($rev['score'] ?? ($rev['krymmel'] ?? 0)));
-        $body   = $rev['body_html'] ?? '';
-
-        if (!$body && !empty($rev['body'])) {
-            $body = wpautop(esc_html($rev['body']));
-        }
+        // API body can contain the editor's HTML even when body_html is absent.
+        // WordPress' extensible post allowlist keeps formatting without executable HTML.
+        $body = wpautop(wp_kses_post(!empty($rev['body_html']) ? $rev['body_html'] : ($rev['body'] ?? '')));
+        $author = trim((string)($rev['author'] ?? ''));
+        $timestamp = self::date_timestamp((string)($rev['review_date'] ?? ''));
+        $date = $timestamp !== null ? date_i18n(get_option('date_format'), $timestamp) : '';
+        $credit = $author !== '' ? 'Anmeldt af '.$author.($date !== '' ? ' den '.$date : '') : ($date !== '' ? 'Anmeldt den '.$date : '');
 
         ob_start();
         if ($wrap) echo '<div class="hs-card hs-detail">';
@@ -223,6 +249,7 @@ class HSNitte_Shortcodes {
             </div>
         </div>
         <div class="hs-detail-body"><?php echo wp_kses_post($body); ?></div>
+        <?php if ($credit !== ''): ?><p class="hs-review-credit"><?php echo esc_html($credit); ?></p><?php endif; ?>
         <?php if (!empty($rev['image_url'])): ?>
             <div class="hs-detail-image">
                 <img loading="lazy" src="<?php echo esc_url($rev['image_url']); ?>" alt="<?php echo esc_attr($rev['image_alt'] ?? ''); ?>">

@@ -44,7 +44,7 @@
         var tr = a.closest('tr.hs-row');
         var id = parseInt(a.getAttribute('data-id')||'0',10);
         var wrap = tr && tr.closest('.hs-list-wrap');
-        var base = wrap ? (wrap.dataset.apiBase||'').replace(/\/+$/,'') : '';
+        var base = wrap ? wrap.dataset.detailUrl || '' : '';
 
         if(!tr) return;
 
@@ -65,45 +65,16 @@
             return;
         }
         if (!base) {
-            detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">API-base-URL er ikke sat i indstillingerne.</div>';
+            detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">Anmeldelsen kunne ikke åbnes. Genindlæs siden og prøv igen.</div>';
             return;
         }
 
         try {
-            var res = await fetch(base + '/reviews/' + id);
-            if(!res.ok) throw new Error('API-fejl ('+res.status+')');
+            var res = await fetch(base + id, {credentials: 'same-origin'});
             var data = await res.json();
-
-            var html = '';
-            html += '<div class="hs-detail-head">';
-            html += '<h3>'+ escapeHTML(data.title || ('#'+id)) +'</h3>';
-            if (data.rating != null) {
-                html += '<div class="hs-rating"><span class="hs-krymmel" role="img" aria-label="'+Math.max(0, Math.min(6, parseInt(data.rating, 10) || 0))+' af 6 krymmel">';
-                var n = Math.max(0, Math.min(6, parseInt(data.rating, 10) || 0));
-                for (var i=0;i<n;i++){ html += '<i class="krym"></i>'; }
-                for (var j=n;j<6;j++){ html += '<i class="krym off"></i>'; }
-                html += '</span></div>';
-            }
-            if (data.bakery_name || data.bakery_address || data.bakery_postcode || data.bakery_city) {
-                var addr = [data.bakery_address, [data.bakery_postcode, data.bakery_city].filter(Boolean).join(" ")].filter(Boolean).join(" • ");
-                var byline = [data.bakery_name, addr].filter(Boolean).join(" — ");
-                html += '<div class="hs-byline">'+ escapeHTML(byline) +'</div>';
-            }
-            html += '</div>';
-            html += '<div class="hs-detail-body">';
-            if (data.body_html) {
-                var parsed = new DOMParser().parseFromString(data.body_html, 'text/html');
-                html += '<p>'+escapeHTML(parsed.body.textContent)+'</p>';
-            }
-            else if (data.body) { html += '<p>'+ escapeHTML(data.body).replace(/\n/g, '<br>') +'</p>'; }
-            html += '</div>';
-            if (data.image_url && /^https?:\/\//i.test(data.image_url)) {
-                var alt = data.image_alt || '';
-                html += '<div class="hs-detail-image"><img loading="lazy" src="'+ escapeHTML(data.image_url) +'" alt="'+ escapeHTML(alt) +'">';
-                if (alt) html += '<div class="hs-image-caption">'+escapeHTML(alt)+'</div>';
-                html += '</div>';
-            }
-            detail.innerHTML = html;
+            if (!res.ok || typeof data.html !== 'string') throw new Error(data.message || 'Kunne ikke hente anmeldelsen.');
+            // Trusted, sanitized HTML from our WordPress renderer, never raw API HTML.
+            detail.innerHTML = data.html;
             if (window.HSNitteReviewDialog) window.HSNitteReviewDialog.refresh(detail);
         } catch (err) {
             detail.querySelector('.hs-detail-body').innerHTML = '<div class="hs-error">'+ escapeHTML(err && err.message ? err.message : 'Kunne ikke hente anmeldelsen') +'</div>';

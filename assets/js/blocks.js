@@ -155,6 +155,16 @@
     save: ()=>null
   });
 
+  registerBlockType('hindbaersnitte/reviewers', {
+    apiVersion: 2,
+    title: __('Snitter – Anmeldere', 'hindbaersnitte'),
+    description: __('Anmeldere med udfoldelige anmeldelseslister.', 'hindbaersnitte'),
+    icon: 'groups', category: 'widgets', supports: {align: ['wide', 'full']},
+    edit: (props)=>wp.element.createElement('div', useBlockProps(),
+      wp.element.createElement(ServerSideRender, {block:'hindbaersnitte/reviewers', attributes:props.attributes})),
+    save: ()=>null
+  });
+
   // 3) Nyeste
   registerBlockType('hindbaersnitte/latest', {
     apiVersion: 2,

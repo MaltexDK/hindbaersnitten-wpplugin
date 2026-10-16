@@ -89,3 +89,19 @@ html.hs-review-modal-open { overflow:hidden; scrollbar-gutter:stable; }
 .hs-latest-copy .hs-krymmel, .hs-review-dialog .hs-krymmel { max-width:none; flex-wrap:nowrap; }
 
 .hs-latest-arrow { display:inline-block; width:.45rem; height:.45rem; margin-left:.35rem; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; transform:rotate(45deg); vertical-align:.05em; }
+
+.hs-review-credit { margin:1.25rem 0 .5rem; color:var(--wp--preset--color--muted,#716460); font-size:.875rem; line-height:1.6; }
+.hs-detail-body :is(p,ul,ol,blockquote) { margin-block:0 1em; }
+.hs-detail-body a { text-decoration:underline; overflow-wrap:anywhere; }
+.hs-detail-body blockquote { margin-inline:0; padding-inline-start:1rem; border-inline-start:3px solid var(--wp--preset--color--raspberry,#a91d46); }
+.hs-reviewers { display:grid; gap:.75rem; }
+.hs-reviewer { min-width:0; border:1px solid var(--hs-border,#e8d9ce); border-radius:12px; background:var(--wp--preset--color--white,#fff); overflow:hidden; }
+.hs-reviewer > summary { overflow-wrap:anywhere; cursor:pointer; padding:1rem 1.25rem; min-height:44px; box-sizing:border-box; color:var(--wp--preset--color--chocolate,#3c2928); font-weight:600; }
+.hs-reviewer > summary::marker { color:var(--wp--preset--color--raspberry,#a91d46); }
+.hs-reviewer > summary:hover, .hs-reviewer[open] > summary { background:var(--wp--preset--color--icing,#fff9f6); }
+.hs-reviewer > summary:focus-visible { outline:2px solid var(--wp--preset--color--raspberry,#a91d46); outline-offset:-4px; }
+.hs-reviewer-count { display:inline-block; margin-inline-start:.75rem; color:var(--wp--preset--color--muted,#716460); font-size:.875rem; font-weight:400; }
+.hs-reviewer-reviews { padding:0 1.25rem 1rem; min-width:0; }
+.hs-reviewer-reviews .hs-list-wrap { max-width:100%; }
+.hs-reviews-more, .hs-reviewer-retry { cursor:pointer; min-height:44px; margin-block:.75rem; padding:.6rem 1rem; font:inherit; color:var(--wp--preset--color--raspberry,#a91d46); background:var(--wp--preset--color--icing,#fff9f6); border:1px solid var(--hs-border,#e8d9ce); border-radius:8px; }
+@media(max-width:600px) { .hs-reviewer > summary { padding:.9rem .75rem; } .hs-reviewer-reviews { padding-inline:.5rem; } }

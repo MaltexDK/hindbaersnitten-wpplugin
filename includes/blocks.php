@@ -64,6 +64,14 @@ add_action('init', function () {
         },
     ]));
 
+    register_block_type('hindbaersnitte/reviewers', array_merge($common, [
+        'api_version'=>2,
+        'supports'=>['align'=>['wide','full']],
+        'render_callback'=>function () {
+            return '<div '.get_block_wrapper_attributes().'>'.HSNitte_Shortcodes::reviewers().'</div>';
+        },
+    ]));
+
     // 3) Nyeste anmeldelse
     register_block_type('hindbaersnitte/latest', array_merge($common, [
         'api_version' => 2,

@@ -9,6 +9,8 @@ function add_action(...$args) {}
 function shortcode_atts($defaults, $atts, $name) { return array_merge($defaults, $atts); }
 function get_option($name, $default = '') { return $name === 'date_format' ? 'Y-m-d' : $default; }
 function esc_attr($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
+function rest_url($path) { return 'https://example.test/wp-json/'.$path; }
+function esc_url($value) { return esc_attr($value); }
 function esc_html($value) { return esc_attr($value); }
 function __($value, $domain = '') { return $value; }
 function date_i18n($format, $timestamp) { return date($format, $timestamp); }

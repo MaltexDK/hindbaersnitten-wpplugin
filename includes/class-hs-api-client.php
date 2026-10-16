@@ -42,6 +42,11 @@ class HSNitte_Api_Client {
         return self::get('reviews', $q, 60);
     }
 
+    /** Public reviewers with published-review counts. */
+    public static function reviewers() {
+        return self::get('reviewers', [], 60);
+    }
+
     /** Én review */
     public static function review(int $id) {
         return self::get('reviews/'.$id, [], 120);
