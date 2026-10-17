@@ -1,5 +1,5 @@
 === Hindbærsnitte – Reviews via API ===
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 
 Vis anmeldelser fra Hindbærsnitte-API'et med shortcodes eller Gutenberg-blokke.
@@ -27,7 +27,7 @@ Klik igen for at vende rækkefølgen. Karakteren går fra 0 til 6 krymmel.
 Tryk **+** i blokeditoren og søg efter **Snitter**:
 
 - **Snitter – Liste**: vælg startsortering, retning, antal og søgning i højre sidepanel.
-- **Snitter – Anmeldere**: indsæt blokken direkte for at vise anmeldere med udfoldelige anmeldelseslister og antal udgivne anmeldelser. Understøtter bred og fuld bredde.
+- **Snitter – Anmeldere**: indsæt blokken direkte for at vise anmeldere med udfoldelige anmeldelseslister og antal udgivne anmeldelser. Anmelderens valgfrie præsentation vises ved udfoldning før anmeldelseslisten. Understøtter bred og fuld bredde.
 - **Snitter – Anmeldelse**: angiv anmeldelsens ID i sidepanelet.
 - **Snitter – Nyeste**: indsæt blokken direkte, fx på forsiden. Den viser automatisk 1–3 anmeldelseskort afhængigt af blokkens bredde. Vælg eventuelt bred eller fuld bredde i blokkens værktøjslinje.
 
@@ -53,6 +53,10 @@ Aktivér pluginet og indstil API-base-URL under Indstillinger → Hindbærsnitte
 Tilføj derefter en Snitter-blok eller en Shortcode-blok på din side.
 
 == Changelog ==
+
+= 1.3.0 =
+* Valgfri formateret præsentation før anmeldelseslisten under hver anmelder.
+* Tomme præsentationer vises ikke. Kræver opdateret anmeldersystem og database for at redigere præsentationer.
 
 = 1.2.0 =
 * Formateret HTML og links bevares i alle fulde anmeldelser.

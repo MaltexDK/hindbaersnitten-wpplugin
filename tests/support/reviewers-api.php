@@ -12,7 +12,7 @@ function hs_reviewers_test_http($pre, $args, $url) {
     parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $query);
     if (str_ends_with($path, '/reviewers')) {
         $data = ['data'=>$scenario === 'empty' ? [] : [
-            ['id'=>7,'handle'=>'Snittefan & ven','review_count'=>101],
+            ['id'=>7,'handle'=>'Snittefan & ven','presentation_html'=>'<p>Jeg elsker <strong>snitter</strong>.</p><ul><li>Sprød bund</li><li>Syrlig marmelade</li></ul><p><a href="https://example.test/profil">Min side</a></p>','review_count'=>101],
             ['id'=>8,'handle'=>'Glasurmesteren','review_count'=>1],
         ]];
     } elseif (preg_match('~/reviews/(\d+)$~', $path, $matches)) {

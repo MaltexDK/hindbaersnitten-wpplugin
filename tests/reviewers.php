@@ -9,6 +9,9 @@ try {
     $html = do_shortcode('[snitter_reviewers]');
     reviewers_verify(substr_count($html,'class="hs-reviewer"')===2, 'Reviewer list missing');
     reviewers_verify(str_contains($html,'Snittefan &amp; ven') && str_contains($html,'101 anmeldelser'), 'Escaped handles or counts missing');
+    reviewers_verify(substr_count($html,'class="hs-reviewer-presentation"')===1, 'Empty presentation must be omitted');
+    reviewers_verify(str_contains($html,'<strong>snitter</strong>') && str_contains($html,'<li>Sprød bund</li>'), 'Presentation formatting missing');
+    reviewers_verify(strpos($html,'hs-reviewer-presentation') < strpos($html,'hs-reviewer-reviews'), 'Presentation must precede reviews');
     $block = render_block(['blockName'=>'hindbaersnitte/reviewers','attrs'=>['align'=>'wide'],'innerContent'=>[]]);
     reviewers_verify(str_contains($block,'alignwide') && str_contains($block,$html), 'Gutenberg renderer differs');
     reviewers_verify(wp_script_is('hsnitte-reviewers','enqueued') && wp_script_is('hsnitte-list','enqueued'), 'Accordion/popup scripts missing');

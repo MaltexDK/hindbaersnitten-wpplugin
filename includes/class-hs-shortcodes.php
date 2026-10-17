@@ -145,6 +145,10 @@ class HSNitte_Shortcodes {
         <?php foreach ($reviewers as $reviewer): ?>
             <details class="hs-reviewer" data-url="<?php echo esc_url(rest_url('hindbaersnitte/v1/reviewers/'.(int)$reviewer['id'].'/reviews')); ?>">
                 <summary><span><?php echo esc_html($reviewer['handle']); ?></span><span class="hs-reviewer-count"><?php echo (int)$reviewer['review_count'].((int)$reviewer['review_count'] === 1 ? ' anmeldelse' : ' anmeldelser'); ?></span></summary>
+                <?php $presentation = wp_kses_post($reviewer['presentation_html'] ?? '');
+                if (trim(str_replace("\xc2\xa0", ' ', html_entity_decode(wp_strip_all_tags($presentation), ENT_QUOTES|ENT_HTML5, 'UTF-8'))) !== ''): ?>
+                    <div class="hs-reviewer-presentation"><?php echo wpautop($presentation); ?></div>
+                <?php endif; ?>
                 <div class="hs-reviewer-reviews"><p role="status">Åbn anmelderen for at hente anmeldelser.</p></div>
             </details>
         <?php endforeach; ?>

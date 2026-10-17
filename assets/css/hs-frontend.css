@@ -105,3 +105,10 @@ html.hs-review-modal-open { overflow:hidden; scrollbar-gutter:stable; }
 .hs-reviewer-reviews .hs-list-wrap { max-width:100%; }
 .hs-reviews-more, .hs-reviewer-retry { cursor:pointer; min-height:44px; margin-block:.75rem; padding:.6rem 1rem; font:inherit; color:var(--wp--preset--color--raspberry,#a91d46); background:var(--wp--preset--color--icing,#fff9f6); border:1px solid var(--hs-border,#e8d9ce); border-radius:8px; }
 @media(max-width:600px) { .hs-reviewer > summary { padding:.9rem .75rem; } .hs-reviewer-reviews { padding-inline:.5rem; } }
+
+.hs-reviewer-presentation { padding:1rem 1.25rem .25rem; overflow-wrap:anywhere; line-height:1.7; }
+.hs-reviewer-presentation > :first-child { margin-top:0; }
+.hs-reviewer-presentation a { text-decoration:underline; overflow-wrap:anywhere; }
+.hs-reviewer-presentation :is(ul,ol) { padding-inline-start:1.5rem; }
+.hs-reviewer-presentation blockquote { margin-inline:0; padding-inline-start:1rem; border-inline-start:3px solid var(--wp--preset--color--raspberry,#a91d46); }
+@media(max-width:600px) { .hs-reviewer-presentation { padding-inline:.75rem; } }
